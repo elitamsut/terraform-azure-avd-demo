@@ -1,0 +1,67 @@
+name: Terraform CI
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  # Optionally, you could add a trigger for the feature branch to simulate 'plan' earlier
+  push:
+    branches:
+      - 'feature/*'  # This will trigger when pushing to a feature branch
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 1: Checkout the code from the repository
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    # Step 2: Set up Terraform (this is optional for the demo, but we're keeping it for simulation purposes)
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.5.0
+
+    # Step 3: Simulate `terraform init`
+    - name: Initialize Terraform (Simulated)
+      run: |
+        echo "Initializing Terraform..."
+        echo "Terraform initialized (this is a simulation)."
+
+    # Step 4: Simulate `terraform validate`
+    - name: Validate Terraform (Simulated)
+      run: |
+        echo "Validating Terraform configuration..."
+        echo "Terraform configuration is valid (this is a simulation)."
+
+    # Step 5: Simulate `terraform plan`
+    - name: Terraform Plan (Simulated)
+      run: |
+        echo "Running Terraform plan..."
+        echo "Terraform plan created with the following changes (this is a simulation):"
+        echo "- Created azurerm_virtual_machine.example"
+        echo "- Location: East US"
+        echo "- Size: Standard_DS1_v2"
+        echo "Plan saved to tfplan (this is a simulation)."
+      # Save plan as artifact (for the demo, we're just simulating it)
+      artifacts:
+        paths:
+          - tfplan
+        when: always
+
+    # Step 6: Simulate `terraform apply`
+    - name: Terraform Apply (Simulated)
+      run: |
+        echo "Applying Terraform plan..."
+        echo "Terraform plan applied successfully (this is a simulation)."
+        echo "Created resources:"
+        echo "- azurerm_virtual_machine.example"
+        echo "- Location: East US"
+        echo "- Size: Standard_DS1_v2"
+      # Apply will only run for `main` branch
+      if: github.ref == 'refs/heads/main'
