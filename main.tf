@@ -1,3 +1,5 @@
+
+
 resource "azurerm_virtual_desktop_host_pool" "example" {
   name                = "example-host-pool"
   location            = "East US"
@@ -6,3 +8,4 @@ resource "azurerm_virtual_desktop_host_pool" "example" {
   type                = "Pooled"
   load_balancer_type  = "BreadthFirst"
 }
+
