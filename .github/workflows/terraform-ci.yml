@@ -1,0 +1,31 @@
+name: Echo Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  echo-job:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Echo Environment Variables
+      run: |
+        echo "Hello from the runner!"
+        echo "Printing environment variables..."
+        echo "USER: $USER"
+        echo "HOME: $HOME"
+        echo "RUNNER OS: $RUNNER_OS"
+        echo "GITHUB_REPOSITORY: $GITHUB_REPOSITORY"
+        echo "GITHUB_REF: $GITHUB_REF"
+
+    - name: Print a custom message
+      run: |
+        echo "This is just an echo test without Azure login!"
