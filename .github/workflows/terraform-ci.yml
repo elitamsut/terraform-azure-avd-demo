@@ -72,4 +72,3 @@ jobs:
       run: |
         echo "Attempting to merge pull request..."
         gh pr merge --auto --squash --subject "Auto-merged by Terraform CI"
-
