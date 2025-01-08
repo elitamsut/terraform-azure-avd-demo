@@ -22,7 +22,7 @@ jobs:
       with:
         terraform_version: 1.5.0
 
-    - name: Create main.tf
+    - name: Create main.tf (Simulated or Real)
       run: |
         cat <<EOF > main.tf
         resource "azurerm_virtual_desktop_host_pool" "example" {
@@ -45,8 +45,8 @@ jobs:
     - name: Format Check (Simulated or Real)
       run: |
         if [ "$SIMULATE_TERRAFORM" = "true" ]; then
-          echo "Validating Terraform configuration... (Simulated)"
-          echo "Terraform configuration is valid (this is a simulation)."
+          echo "Checking Terraform format... (Simulated)"
+          echo "Terraform format is correct (this is a simulation)."
         else
           terraform fmt -check
         fi
@@ -66,6 +66,8 @@ jobs:
           echo "Running Terraform plan... (Simulated)"
           echo "Terraform plan created with the following changes (this is a simulation):"
           echo "- Created azurerm_virtual_desktop_host_pool.example"
+          echo "Simulated plan saved to tfplan."
+          echo "simulated_tfplan" > tfplan
         else
           terraform plan -out=tfplan
         fi
