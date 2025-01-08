@@ -1,26 +1,34 @@
-name: Auto-Merge Pull Requests
+name: Test Auto-Merge
 
 on:
   pull_request:
     branches:
-      - main # Only trigger for PRs targeting main
+      - main
+      - 'feature/*' # Trigger when PRs are made to main or feature branches
     types:
-      - opened # Trigger when a PR is opened
+      - opened # Only run the workflow when a PR is opened
 
 jobs:
   auto-merge:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout PR branch
+      - name: Checkout code
         uses: actions/checkout@v3
         with:
-          ref: ${{ github.event.pull_request.head.ref }} # Dynamically fetch the branch name
-          repository: ${{ github.event.pull_request.head.repo.full_name }} # Use the full repo path for PRs from forks
+          ref: ${{ github.event.pull_request.head.ref }} # Check out the source branch of the PR
+          repository: ${{ github.event.pull_request.head.repo.full_name }} # Full repo path for PRs from forks
+
+      - name: Debug Context
+        run: |
+          echo "Pull request number: ${{ github.event.pull_request.number }}"
+          echo "Source branch: ${{ github.event.pull_request.head.ref }}"
+          echo "Target branch: ${{ github.event.pull_request.base.ref }}"
 
       - name: Auto-Merge PR
+        if: ${{ github.event_name == 'pull_request' && github.event.action == 'opened' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "Attempting to merge pull request..."
-          gh pr merge --auto --squash --subject "Auto-merged by CI pipeline"
+          gh pr merge ${{ github.event.pull_request.number }} --auto --squash --subject "Auto-merged by Test Pipeline"
 
