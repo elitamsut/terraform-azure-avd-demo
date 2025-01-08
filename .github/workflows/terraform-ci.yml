@@ -1,74 +1,25 @@
-name: Terraform CI
+name: Test Auto-Merge
 
 on:
   pull_request:
     branches:
       - main
-  push:
-    branches:
-      - main
-      - 'feature/*'  # Trigger on feature branch pushes for early planning
+      - 'feature/*' # Trigger when PRs are made to main or feature branches
+    types:
+      - opened # Only run the workflow when a PR is opened
 
 jobs:
-  terraform:
+  auto-merge:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v2
-      with:
-        terraform_version: 1.5.0
+      - name: Auto-Merge PR
+        if: ${{ github.event_name == 'pull_request' && github.event.action == 'opened' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Attempting to merge pull request..."
+          gh pr merge --auto --squash --subject "Auto-merged by Test Pipeline"
 
-    - name: Simulate main.tf creation
-      run: |
-        if [ "$SIMULATE_TERRAFORM" = "true" ]; then
-          echo "Simulating main.tf creation"
-          echo 'resource "azurerm_virtual_desktop_host_pool" "example" {' > main.tf
-          echo '  name                = "example"' >> main.tf
-          echo '  location            = "East US"' >> main.tf
-          echo '  resource_group_name = "example-resources"' >> main.tf
-          echo '  type                = "Pooled"' >> main.tf
-          echo '}' >> main.tf
-          echo "main.tf created."
-        fi
-
-    - name: Simulate Terraform Initialization
-      run: |
-        if [ "$SIMULATE_TERRAFORM" = "true" ]; then
-          echo "Simulating Terraform initialization."
-          echo "Terraform initialized (simulation only)."
-        fi
-
-    - name: Simulate Format Check
-      run: |
-        if [ "$SIMULATE_TERRAFORM" = "true" ]; then
-          echo "Simulating Terraform format check."
-          echo "Terraform format is correct (simulation only)."
-        fi
-
-    - name: Simulate Terraform Validation
-      run: |
-        if [ "$SIMULATE_TERRAFORM" = "true" ]; then
-          echo "Simulating Terraform validation."
-          echo "Terraform configuration is valid (simulation only)."
-        fi
-
-    - name: Simulate Terraform Plan
-      run: |
-        if [ "$SIMULATE_TERRAFORM" = "true" ]; then
-          echo "Simulating Terraform plan."
-          echo "Terraform plan created with the following changes (simulation only):"
-          echo "- Created azurerm_virtual_desktop_host_pool.example"
-          echo "Simulated plan saved to tfplan."
-        fi
-
-    - name: Auto-Merge PR
-      if: ${{ github.event_name == 'pull_request' && github.event.action == 'opened' }}
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        echo "Attempting to merge pull request..."
-        gh pr merge --auto --squash --subject "Auto-merged by Terraform CI"
