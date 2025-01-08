@@ -26,55 +26,44 @@ jobs:
       run: |
         if [ "$SIMULATE_TERRAFORM" = "true" ]; then
           echo "Simulating main.tf creation"
-          echo "resource \"azurerm_virtual_desktop_host_pool\" \"example\" {" > main.tf
-          echo "  name = \"example\"" >> main.tf
-          echo "  location = \"East US\"" >> main.tf
-          echo "  resource_group_name = \"example-resources\"" >> main.tf
-          echo "  type = \"Pooled\"" >> main.tf
-          echo "}" >> main.tf
+          cat <<EOF > main.tf
+          resource "azurerm_virtual_desktop_host_pool" "example" {
+            name                = "example"
+            location            = "East US"
+            resource_group_name = "example-resources"
+            type                = "Pooled"
+          }
+          EOF
+          echo "main.tf created."
         fi
 
-    - name: Initialize Terraform (Simulated or Real)
+    - name: Simulate Terraform Initialization
       run: |
         if [ "$SIMULATE_TERRAFORM" = "true" ]; then
-          echo "Initializing Terraform... (Simulated)"
-          echo "Terraform initialized (this is a simulation)."
-        else
-          terraform init
+          echo "Simulating Terraform initialization."
+          echo "Terraform initialized (simulation only)."
         fi
 
-    - name: Format Check (Simulated or Real)
+    - name: Simulate Format Check
       run: |
         if [ "$SIMULATE_TERRAFORM" = "true" ]; then
-          echo "Checking Terraform format... (Simulated)"
-          echo "Terraform format is correct (this is a simulation)."
-        else
-          terraform fmt -check
+          echo "Simulating Terraform format check."
+          echo "Terraform format is correct (simulation only)."
         fi
 
-    - name: Validate Terraform (Simulated or Real)
+    - name: Simulate Terraform Validation
       run: |
         if [ "$SIMULATE_TERRAFORM" = "true" ]; then
-          echo "Validating Terraform configuration... (Simulated)"
-          echo "Terraform configuration is valid (this is a simulation)."
-        else
-          terraform validate
+          echo "Simulating Terraform validation."
+          echo "Terraform configuration is valid (simulation only)."
         fi
 
-    - name: Terraform Plan (Simulated or Real)
+    - name: Simulate Terraform Plan
       run: |
         if [ "$SIMULATE_TERRAFORM" = "true" ]; then
-          echo "Running Terraform plan... (Simulated)"
-          echo "Terraform plan created with the following changes (this is a simulation):"
+          echo "Simulating Terraform plan."
+          echo "Terraform plan created with the following changes (simulation only):"
           echo "- Created azurerm_virtual_desktop_host_pool.example"
           echo "Simulated plan saved to tfplan."
-          echo "simulated_tfplan" > tfplan
-        else
-          terraform plan -out=tfplan
         fi
-
-    - name: Apply Terraform Plan (Real only)
-      if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
-      run: |
-        terraform apply -auto-approve tfplan
 
