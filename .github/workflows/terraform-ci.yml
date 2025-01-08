@@ -22,16 +22,17 @@ jobs:
       with:
         terraform_version: 1.5.0
 
-    - name: Create main.tf (Simulated or Real)
+    - name: Simulate main.tf creation
       run: |
-        cat <<EOF > main.tf
-        resource "azurerm_virtual_desktop_host_pool" "example" {
-          name                = "example"
-          location            = "East US"
-          resource_group_name = "example-resources"
-          type                = "Pooled"
-        }
-        EOF
+        if [ "$SIMULATE_TERRAFORM" = "true" ]; then
+          echo "Simulating main.tf creation"
+          echo "resource \"azurerm_virtual_desktop_host_pool\" \"example\" {" > main.tf
+          echo "  name = \"example\"" >> main.tf
+          echo "  location = \"East US\"" >> main.tf
+          echo "  resource_group_name = \"example-resources\"" >> main.tf
+          echo "  type = \"Pooled\"" >> main.tf
+          echo "}" >> main.tf
+        fi
 
     - name: Initialize Terraform (Simulated or Real)
       run: |
