@@ -65,3 +65,11 @@ jobs:
           echo "Simulated plan saved to tfplan."
         fi
 
+    - name: Auto-Merge PR
+      if: ${{ github.event_name == 'pull_request' && github.event.action == 'opened' }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        echo "Attempting to merge pull request..."
+        gh pr merge --auto --squash --subject "Auto-merged by Terraform CI"
+
