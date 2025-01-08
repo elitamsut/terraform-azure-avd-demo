@@ -34,8 +34,8 @@ jobs:
     - name: Format Check (Simulated or Real)
       run: |
         if [ "$SIMULATE_TERRAFORM" = "true" ]; then
-          echo "Validating Terraform configuration... (Simulated)"
-          echo "Terraform configuration is valid (this is a simulation)."
+          echo "Validating Terraform formatting... (Simulated)"
+          echo "Terraform formatting is valid (this is a simulation)."
         else
           terraform fmt -check
         fi
@@ -58,7 +58,7 @@ jobs:
           echo "- Location: East US"
           echo "- Size: Standard_DS1_v2"
           echo "- Created azurerm_virtual_desktop_host_pool.example"
-          echo "Plan saved to tfplan (this is a simulation)."
+          echo "Simulated tfplan saved to file."
           echo "simulated_tfplan" > tfplan  # Simulate saving tfplan as an artifact
         else
           terraform plan -out=tfplan
@@ -67,10 +67,14 @@ jobs:
     - name: Comment Terraform Plan on PR (Only for PR Events)
       if: ${{ github.event_name == 'pull_request' }}
       run: |
-        terraform show -json tfplan | jq '.' > plan.json
-        echo "### Terraform Plan" > comment.md
-        terraform show tfplan >> comment.md
-        gh pr comment ${{ github.event.pull_request.number }} --body-file comment.md
+        if [ "$SIMULATE_TERRAFORM" = "true" ]; then
+          echo "Skipping PR comment (Simulated)."
+        else
+          terraform show -json tfplan | jq '.' > plan.json
+          echo "### Terraform Plan" > comment.md
+          terraform show tfplan >> comment.md
+          gh pr comment ${{ github.event.pull_request.number }} --body-file comment.md
+        fi
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
