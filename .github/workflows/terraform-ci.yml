@@ -27,13 +27,13 @@ jobs:
         if [ "$SIMULATE_TERRAFORM" = "true" ]; then
           echo "Simulating main.tf creation"
           cat <<EOF > main.tf
-          resource "azurerm_virtual_desktop_host_pool" "example" {
-            name                = "example"
-            location            = "East US"
-            resource_group_name = "example-resources"
-            type                = "Pooled"
-          }
-          EOF
+resource "azurerm_virtual_desktop_host_pool" "example" {
+  name                = "example"
+  location            = "East US"
+  resource_group_name = "example-resources"
+  type                = "Pooled"
+}
+EOF
           echo "main.tf created."
         fi
 
