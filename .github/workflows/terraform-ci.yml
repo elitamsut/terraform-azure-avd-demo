@@ -66,3 +66,4 @@ EOF
           echo "- Created azurerm_virtual_desktop_host_pool.example"
           echo "Simulated plan saved to tfplan."
         fi
+
