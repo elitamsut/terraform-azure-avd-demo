@@ -1,31 +1,93 @@
-name: Echo Pipeline
+name: Terraform CI
 
 on:
-  push:
-    branches:
-      - main
   pull_request:
     branches:
       - main
+  push:
+    branches:
+      - main
+      - 'feature/*'  # Trigger on feature branch pushes for early planning
 
 jobs:
-  echo-job:
+  terraform:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
+    - name: Checkout Code
       uses: actions/checkout@v3
 
-    - name: Echo Environment Variables
-      run: |
-        echo "Hello from the runner!"
-        echo "Printing environment variables..."
-        echo "USER: $USER"
-        echo "HOME: $HOME"
-        echo "RUNNER OS: $RUNNER_OS"
-        echo "GITHUB_REPOSITORY: $GITHUB_REPOSITORY"
-        echo "GITHUB_REF: $GITHUB_REF"
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.5.0
 
-    - name: Print a custom message
+    - name: Initialize Terraform (Simulated or Real)
       run: |
-        echo "This is just an echo test without Azure login!"
+        if [ "$SIMULATE_TERRAFORM" = "true" ]; then
+          echo "Initializing Terraform... (Simulated)"
+          echo "Terraform initialized (this is a simulation)."
+        else
+          terraform init
+        fi
+
+    - name: Format Check (Simulated or Real)
+      run: |
+        if [ "$SIMULATE_TERRAFORM" = "true" ]; then
+          echo "Validating Terraform configuration... (Simulated)"
+          echo "Terraform configuration is valid (this is a simulation)."
+        else
+          terraform fmt -check
+        fi
+
+    - name: Validate Terraform (Simulated or Real)
+      run: |
+        if [ "$SIMULATE_TERRAFORM" = "true" ]; then
+          echo "Validating Terraform configuration... (Simulated)"
+          echo "Terraform configuration is valid (this is a simulation)."
+        else
+          terraform validate
+        fi
+
+    - name: Terraform Plan (Simulated or Real)
+      run: |
+        if [ "$SIMULATE_TERRAFORM" = "true" ]; then
+          echo "Running Terraform plan... (Simulated)"
+          echo "Terraform plan created with the following changes (this is a simulation):"
+          echo "- Created azurerm_virtual_machine.example"
+          echo "- Location: East US"
+          echo "- Size: Standard_DS1_v2"
+          echo "- Created azurerm_virtual_desktop_host_pool.example"
+          echo "Plan saved to tfplan (this is a simulation)."
+          echo "simulated_tfplan" > tfplan  # Simulate saving tfplan as an artifact
+        else
+          terraform plan -out=tfplan
+        fi
+
+    - name: Comment Terraform Plan on PR (Only for PR Events)
+      if: ${{ github.event_name == 'pull_request' }}
+      run: |
+        terraform show -json tfplan | jq '.' > plan.json
+        echo "### Terraform Plan" > comment.md
+        terraform show tfplan >> comment.md
+        gh pr comment ${{ github.event.pull_request.number }} --body-file comment.md
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Terraform Apply (Simulated or Real)
+      run: |
+        if [ "$SIMULATE_TERRAFORM" = "true" ]; then
+          echo "Applying Terraform plan... (Simulated)"
+          echo "Terraform plan applied successfully (this is a simulation)."
+          echo "Created resources:"
+          echo "- azurerm_virtual_machine.example"
+          echo "- Location: East US"
+          echo "- Size: Standard_DS1_v2"
+          echo "- azurerm_virtual_desktop_host_pool.example"
+        else
+          terraform apply -auto-approve tfplan
+        fi
+      if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
